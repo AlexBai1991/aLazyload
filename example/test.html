@@ -4,8 +4,39 @@
 	<meta charset="UTF-8">
 	<title>test aLazyload</title>
 	<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+	<style>
+	* {
+		margin: 0;
+		padding: 0;
+	}
+	#wrapper li {
+		margin-bottom: 40px;
+	}
+	#wrapper img{
+		max-width: 100%;
+		min-height: 100px;
+	}
+	</style>
 </head>
 <body>
-					
+	<section id="wrapper">
+		<ul>
+			<li><img class="img-item" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="IMG" data-img="./imgs/img1.jpg"></li>
+			<li><img class="img-item" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="IMG" data-img="./imgs/img2.jpg"></li>
+			<li><img class="img-item" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="IMG" data-img="./imgs/img3.jpg"></li>
+			<li><img class="img-item" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="IMG" data-img="./imgs/img4.jpg"></li>
+			<li><img class="img-item" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="IMG" data-img="./imgs/img5.jpg"></li>
+			<li><img class="img-item" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="IMG" data-img="./imgs/img6.jpg"></li>
+		</ul>
+	</section>		
+
+	<script src="../src/alazyload.js"></script>
+	<script type="text/javascript">
+		var lazyload = new ALazyload('#wrapper', {
+			itemClass: '.img-item',
+			dataSrc: 'data-img',
+			offset: 50
+		});
+	</script>
 </body>
 </html>

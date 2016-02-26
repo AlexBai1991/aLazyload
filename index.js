@@ -1,1 +1,1 @@
-module.exports = require('../src/alazyload.js');
+module.exports = require('./src/alazyload.js');
