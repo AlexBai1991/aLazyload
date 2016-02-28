@@ -1,6 +1,6 @@
 {
   "name": "alazyload",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "lazyload plugin for image galleries",
   "main": "index.js",
   "scripts": {
