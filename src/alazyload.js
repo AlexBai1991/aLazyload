@@ -7,7 +7,7 @@ var ALazyload = (function (win, doc, undefined) {
       offset: 100
     }
   */
-  var slice = [].slice, WAIT_TIME = 30;
+  var slice = [].slice, WAIT_TIME = 200;
   var extend = function (target, source, isOverwrite) {
     isOverwrite = typeof isOverwrite == 'undefined' ? false : Boolean(isOverwrite);
     for (var key in source) {
@@ -17,22 +17,39 @@ var ALazyload = (function (win, doc, undefined) {
     }
     return target;
   };
-  var debounce = function (fn, wait, immediate) {
-    var timer = null;
-    return function (context) {
-      context = context || this,
-      args = slice.call(arguments, 1);
-      var callNow = immediate && !timer;
-      if (callNow) {
-        // handle immediate call fn
-        fn.apply(context, args);
-      } else {
-        timer && clearTimeout(timer);
-        timer = setTimeout(function () {
-          timer = null;
-          fn.apply(context, args);
-        }, wait);
+  var now = function now() {
+    return +new Date();
+  };
+  var debounce = function (fn, wait, immediate, minExcuInterval) {
+    var timer = null, context, args, ret, timestamp = now();
+    var later = function () {
+      timer = null;
+      if (!immediate) {
+        ret = fn.apply(context, args);
+        timestamp = null;
+        context = args = null;
       }
+    };
+    return function (ctx) {
+      context = ctx || this, args = slice.call(arguments, 1);
+      !timestamp && (timestamp = now());
+      timer && clearTimeout(timer);
+      var last = now() - timestamp;
+      if (last >= minExcuInterval) {
+        // handle min excution interval
+        ret = fn.apply(context, args);
+        timestamp = null;
+        context = args = null;
+      } else {
+        var callNow = immediate && !timer;
+        if (callNow) {
+          // handle immediate call fn
+          ret = fn.apply(context, args);
+          timestamp = null;
+        }
+        timer = setTimeout(later, wait);
+      }
+      return ret;
     };
   };
   var Lazyload = function (element, opts) {
@@ -63,7 +80,7 @@ var ALazyload = (function (win, doc, undefined) {
       // initial load images within viewport
       this._loadImgsWithinView();
       // load images when scrolling into viewport
-      var optimizedLoadImgsWithinView = debounce(this._loadImgsWithinView, WAIT_TIME);
+      var optimizedLoadImgsWithinView = debounce(this._loadImgsWithinView, WAIT_TIME, false, 2000);
       doc.addEventListener('scroll', function (e) {
         optimizedLoadImgsWithinView(self);
       });
@@ -89,7 +106,7 @@ var ALazyload = (function (win, doc, undefined) {
           imgRect.left <= viewport.right &&
           imgRect.right >= viewport.left
         );
-        console.log(isInViewport);
+        console.log('isInViewport: ', isInViewport);
         // load img within viewport
         if (isInViewport) {
           console.log('load img: ', imgItem);
