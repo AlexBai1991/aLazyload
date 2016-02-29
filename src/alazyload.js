@@ -60,7 +60,7 @@ var ALazyload = (function (win, doc, undefined) {
       offset: 0
     };
     if (!len) {
-      if (typeof element === 'string') {
+      if (typeof element !== 'object' || element === null) {
         throw new Error('need opts arguments here.');
       }
       opts = element;
@@ -79,11 +79,12 @@ var ALazyload = (function (win, doc, undefined) {
       var self = this;
       // initial load images within viewport
       this._loadImgsWithinView();
-      // load images when scrolling into viewport
       var optimizedLoadImgsWithinView = debounce(this._loadImgsWithinView, WAIT_TIME, false, 2000);
-      doc.addEventListener('scroll', function (e) {
-        optimizedLoadImgsWithinView(self);
-      });
+      this._optimizedLoadImgsWithinView = function (e) {
+        optimizedLoadImgsWithinView.call(this, self);
+      };
+      // load images when scrolling into viewport
+      this._addScrollHandler();
     },
     _loadImgsWithinView: function () {
       var offset = typeof (offset = this.opts.offset) !== 'number' ? parseInt(offset, 10) : offset;
@@ -116,6 +117,10 @@ var ALazyload = (function (win, doc, undefined) {
           len--;
         }
       }
+      if (len === 0) {
+        // remove scroll event handler
+        this._removeScrollHandler();
+      }
     },
     _loadImgItem: function (img) {
       var dataSrc = this.opts.dataSrc,
@@ -124,6 +129,12 @@ var ALazyload = (function (win, doc, undefined) {
       if (imgSrc) {
         img.setAttribute('src', imgSrc);
       }
+    },
+    _removeScrollHandler: function () {
+      doc.removeEventListener('scroll', this._optimizedLoadImgsWithinView);
+    },
+    _addScrollHandler: function () {
+      doc.addEventListener('scroll', this._optimizedLoadImgsWithinView);
     }
   };
   return Lazyload;
