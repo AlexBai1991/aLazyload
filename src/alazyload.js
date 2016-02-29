@@ -17,39 +17,31 @@ var ALazyload = (function (win, doc, undefined) {
     }
     return target;
   };
-  var now = function now() {
+  function _now() {
     return +new Date();
-  };
-  var debounce = function (fn, wait, immediate, minExcuInterval) {
-    var timer = null, context, args, ret, timestamp = now();
+  }
+  var throttle = function (fn, wait) {
+    var timer = null, previous = 0, context, args, ret;
     var later = function () {
+      previous = _now();
       timer = null;
-      if (!immediate) {
-        ret = fn.apply(context, args);
-        timestamp = null;
-        context = args = null;
-      }
+      ret = fn.apply(context, args);
+      args = null;
     };
     return function (ctx) {
-      context = ctx || this, args = slice.call(arguments, 1);
-      !timestamp && (timestamp = now());
-      timer && clearTimeout(timer);
-      var last = now() - timestamp;
-      if (last >= minExcuInterval) {
-        // handle min excution interval
+      var now = _now();
+      context = ctx, args = slice.call(arguments, 1);
+      if (!previous) previous = now;
+      var remaining = wait - (now - previous);
+      if (remaining <= 0 || remaining > wait) {
+        timer && clearTimeout(timer);
+        timer = null;
+        previous = now;
         ret = fn.apply(context, args);
-        timestamp = null;
-        context = args = null;
+        args = null;
       } else {
-        var callNow = immediate && !timer;
-        if (callNow) {
-          // handle immediate call fn
-          ret = fn.apply(context, args);
-          timestamp = null;
-        }
-        timer = setTimeout(later, wait);
+        timer = setTimeout(later, remaining);
       }
-      return ret;
     };
   };
   var Lazyload = function (element, opts) {
@@ -79,7 +71,7 @@ var ALazyload = (function (win, doc, undefined) {
       var self = this;
       // initial load images within viewport
       this._loadImgsWithinView();
-      var optimizedLoadImgsWithinView = debounce(this._loadImgsWithinView, WAIT_TIME, false, 2000);
+      var optimizedLoadImgsWithinView = throttle(this._loadImgsWithinView, WAIT_TIME);
       this._optimizedLoadImgsWithinView = function (e) {
         optimizedLoadImgsWithinView.call(this, self);
       };
